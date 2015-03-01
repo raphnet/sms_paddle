@@ -2,13 +2,14 @@ CC=avr-gcc
 AS=$(CC)
 LD=$(CC)
 
+PROG=smspaddle
+
 CPU=atmega8
 AVRDUDE=avrdude -p m8 -P usb -c avrispmkII
 CFLAGS=-Wall -mmcu=$(CPU) -Os -DF_CPU=8000000L
-LDFLAGS=-mmcu=$(CPU) -Wl,-Map=mapfile.map
+LDFLAGS=-mmcu=$(CPU) -Wl,-Map=$(PROG).map
 
 OBJS=smspaddle.o
-PROG=smspaddle
 
 # RSTDISBL  WDTON  SPIEN  CKOPT  EESAVE  BOOTSZ1  BOOTSZ0  BOOTRST
 #    1        1      0      1      1        0        0        1
