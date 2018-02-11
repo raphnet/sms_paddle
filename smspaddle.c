@@ -108,7 +108,12 @@ int main(void)
 				// Switch ADC to free running mode so we can concentrate on reacting
 				// quickly to transition on PORTD2
 				ADCSRA = (1<<ADEN) | (1<<ADPS2) | (1<<ADPS0);
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega168A__) || defined(__AVR_ATmega168P__)
+				ADCSRB = 0; // Auto-trigger source: Free Running mode
+				ADCSRA |= (1<<ADATE) | (1<<ADSC);
+#else
 				ADCSRA |= (1<<ADFR) | (1<<ADSC);
+#endif
 				state = STATE_EXPORT_RUNNING;
 				break;
 

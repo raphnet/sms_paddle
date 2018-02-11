@@ -1,0 +1,50 @@
+CC=avr-gcc
+AS=$(CC)
+LD=$(CC)
+
+PROG=smspaddle
+
+CPU=atmega168a
+AVRDUDE=avrdude -p m168 -P usb -c avrispmkII
+CFLAGS=-Wall -mmcu=$(CPU) -Os -DF_CPU=8000000L
+LDFLAGS=-mmcu=$(CPU) -Wl,-Map=$(PROG).map
+
+OBJS=smspaddle.o
+
+#EFUSE=0x01
+EFUSE=0xF9
+HFUSE=0xDD
+LFUSE=0xE2
+
+all: $(PROG).hex
+
+clean:
+	rm -f $(PROG).elf $(PROG).hex $(PROG).map $(OBJS)
+
+$(PROG).elf: $(OBJS)
+	$(LD) $(OBJS) $(LDFLAGS) -o $(PROG).elf
+
+$(PROG).hex: $(PROG).elf
+	avr-objcopy -j .data -j .text -O ihex $(PROG).elf $(PROG).hex
+	avr-size $(PROG).elf
+
+flash: $(PROG).hex
+	$(AVRDUDE) -Uflash:w:$< -B 5.0 -e
+
+fuse:
+	$(AVRDUDE) -e -Uefuse:w:$(EFUSE):m -Uhfuse:w:$(HFUSE):m -Ulfuse:w:$(LFUSE):m -B 20.0 -F
+
+erase:
+	$(AVRDUDE) -B 10.0 -e
+
+reset:
+	$(AVRDUDE) -B 10.0
+
+%.o: %.S
+	$(CC) $(CFLAGS) -c $<
+
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+
+%.o: %.c %.h
+	$(CC) $(CFLAGS) -c $<
